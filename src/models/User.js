@@ -83,7 +83,10 @@ userSchema.methods.toJSON = function() {
   return user;
 };
 
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
+// Indexes for email and username are automatically created by unique: true
+// Additional indexes for query optimization
+userSchema.index({ role: 1 });
+userSchema.index({ isActive: 1 });
+userSchema.index({ lastLogin: -1 });
 
 module.exports = mongoose.model('User', userSchema);
