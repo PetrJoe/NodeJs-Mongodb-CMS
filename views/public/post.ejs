@@ -1,0 +1,577 @@
+<%- include('../partials/head', {
+  title: locals.post ? post.title : 'Post Not Found',
+  metaTags: locals.post ? `<meta name="description" content="${post.excerpt || post.title}">` : '<meta name="description" content="Post not found.">'
+}) %>
+
+<% if (locals.post) { %>
+<!-- Post Header -->
+<div class="relative bg-gray-900">
+  <% if (post.featuredImage) { %>
+    <div class="absolute inset-0">
+      <img src="<%= post.featuredImage %>" alt="<%= post.title %>" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-black opacity-60"></div>
+    </div>
+  <% } else { %>
+    <div class="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-700"></div>
+  <% } %>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+    <div class="max-w-4xl">
+      <!-- Category & Date -->
+      <div class="flex items-center space-x-4 mb-6">
+        <% if (post.category) { %>
+          <a
+            href="/blog?category=<%= post.category.slug %>"
+            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white bg-opacity-20 text-white hover:bg-opacity-30 transition-colors"
+          >
+            <%= post.category.name %>
+          </a>
+        <% } %>
+
+        <div class="flex items-center text-white text-sm">
+          <i class="fas fa-calendar mr-2"></i>
+          <%= new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) %>
+        </div>
+
+        <div class="flex items-center text-white text-sm">
+          <i class="fas fa-clock mr-2"></i>
+          <%= Math.ceil((post.content.length || 0) / 200) %> min read
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        <%= post.title %>
+      </h1>
+
+      <!-- Excerpt -->
+      <% if (post.excerpt) { %>
+        <p class="text-xl text-gray-300 leading-relaxed mb-8">
+          <%= post.excerpt %>
+        </p>
+      <% } %>
+
+      <!-- Author & Stats -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-3">
+            <% if (post.author.avatar) { %>
+              <img
+                src="<%= post.author.avatar %>"
+                alt="<%= post.author.fullName || post.author.username %>"
+                class="h-12 w-12 rounded-full border-2 border-white"
+              >
+            <% } else { %>
+              <div class="h-12 w-12 rounded-full bg-white bg-opacity-20 flex items-center justify-center border-2 border-white">
+                <span class="text-lg font-medium text-white">
+                  <%= (post.author.fullName || post.author.username).charAt(0).toUpperCase() %>
+                </span>
+              </div>
+            <% } %>
+
+            <div>
+              <p class="text-white font-medium">
+                <%= post.author.fullName || post.author.username %>
+              </p>
+              <% if (post.author.bio) { %>
+                <p class="text-gray-300 text-sm">
+                  <%= post.author.bio.substring(0, 50) %>...
+                </p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-6 text-white">
+          <div class="flex items-center">
+            <i class="fas fa-eye mr-2"></i>
+            <span><%= post.views || 0 %></span>
+          </div>
+          <div class="flex items-center">
+            <i class="fas fa-heart mr-2"></i>
+            <span id="likes-count"><%= post.likes || 0 %></span>
+          </div>
+          <button
+            onclick="sharePost()"
+            class="flex items-center hover:text-primary-300 transition-colors"
+          >
+            <i class="fas fa-share-alt mr-2"></i>
+            Share
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="lg:grid lg:grid-cols-4 lg:gap-12">
+    <!-- Article Content -->
+    <article class="lg:col-span-3">
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
+        <!-- Content -->
+        <div class="prose prose-lg max-w-none">
+          <%- post.content %>
+        </div>
+
+        <!-- Tags -->
+        <% if (post.tags && post.tags.length > 0) { %>
+          <div class="mt-8 pt-8 border-t border-gray-200">
+            <h3 class="text-sm font-medium text-gray-900 mb-3">Tags:</h3>
+            <div class="flex flex-wrap gap-2">
+              <% post.tags.forEach(tag => { %>
+                <a
+                  href="/blog?search=%23<%= tag %>"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 hover:bg-primary-200 transition-colors"
+                >
+                  #<%= tag %>
+                </a>
+              <% }); %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Social Share -->
+        <div class="mt-8 pt-8 border-t border-gray-200">
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Share this post:</h3>
+          <div class="flex space-x-4">
+            <a
+              href="#"
+              onclick="shareOnTwitter()"
+              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <i class="fab fa-twitter mr-2 text-blue-400"></i>
+              Twitter
+            </a>
+            <a
+              href="#"
+              onclick="shareOnFacebook()"
+              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <i class="fab fa-facebook-f mr-2 text-blue-600"></i>
+              Facebook
+            </a>
+            <a
+              href="#"
+              onclick="shareOnLinkedIn()"
+              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <i class="fab fa-linkedin-in mr-2 text-blue-700"></i>
+              LinkedIn
+            </a>
+            <button
+              onclick="copyToClipboard()"
+              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            >
+              <i class="fas fa-copy mr-2"></i>
+              Copy Link
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Author Bio -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <div class="flex items-start space-x-4">
+          <% if (post.author.avatar) { %>
+            <img
+              src="<%= post.author.avatar %>"
+              alt="<%= post.author.fullName || post.author.username %>"
+              class="h-16 w-16 rounded-full"
+            >
+          <% } else { %>
+            <div class="h-16 w-16 rounded-full bg-primary-600 flex items-center justify-center">
+              <span class="text-xl font-medium text-white">
+                <%= (post.author.fullName || post.author.username).charAt(0).toUpperCase() %>
+              </span>
+            </div>
+          <% } %>
+
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-gray-900">
+              <%= post.author.fullName || post.author.username %>
+            </h3>
+            <% if (post.author.bio) { %>
+              <p class="text-gray-600 mt-1">
+                <%= post.author.bio %>
+              </p>
+            <% } %>
+            <% if (post.author.website || post.author.twitter) { %>
+              <div class="flex space-x-4 mt-3">
+                <% if (post.author.website) { %>
+                  <a
+                    href="<%= post.author.website %>"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-primary-600 hover:text-primary-500 text-sm"
+                  >
+                    <i class="fas fa-globe mr-1"></i>
+                    Website
+                  </a>
+                <% } %>
+                <% if (post.author.twitter) { %>
+                  <a
+                    href="https://twitter.com/<%= post.author.twitter %>"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-primary-600 hover:text-primary-500 text-sm"
+                  >
+                    <i class="fab fa-twitter mr-1"></i>
+                    Twitter
+                  </a>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-6">
+          <i class="fas fa-comments mr-2"></i>
+          Comments (<span id="comments-count">0</span>)
+        </h3>
+
+        <!-- Comment Form -->
+        <% if (user) { %>
+          <form id="comment-form" class="mb-8" x-data="{ content: '', submitting: false }">
+            <div class="flex space-x-4">
+              <% if (user.avatar) { %>
+                <img src="<%= user.avatar %>" alt="<%= user.fullName || user.username %>" class="h-10 w-10 rounded-full">
+              <% } else { %>
+                <div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center">
+                  <span class="text-sm font-medium text-white">
+                    <%= user.username.charAt(0).toUpperCase() %>
+                  </span>
+                </div>
+              <% } %>
+
+              <div class="flex-1">
+                <textarea
+                  x-model="content"
+                  placeholder="Add a comment..."
+                  rows="3"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                ></textarea>
+                <div class="mt-3 flex justify-between items-center">
+                  <p class="text-xs text-gray-500">
+                    Be respectful and constructive in your comments.
+                  </p>
+                  <button
+                    type="submit"
+                    :disabled="!content.trim() || submitting"
+                    :class="{ 'opacity-50 cursor-not-allowed': !content.trim() || submitting }"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  >
+                    <span x-text="submitting ? 'Posting...' : 'Post Comment'"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        <% } else { %>
+          <div class="text-center py-8 bg-gray-50 rounded-lg mb-8">
+            <p class="text-gray-600 mb-4">Please sign in to leave a comment.</p>
+            <a
+              href="/auth/login"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+            >
+              Sign In
+            </a>
+          </div>
+        <% } %>
+
+        <!-- Comments List -->
+        <div id="comments-list">
+          <div class="animate-pulse space-y-4">
+            <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Sidebar -->
+    <aside class="lg:col-span-1 mt-12 lg:mt-0">
+      <!-- Table of Contents -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 sticky top-8">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">
+          <i class="fas fa-list mr-2"></i>
+          Table of Contents
+        </h3>
+        <div id="table-of-contents" class="space-y-2 text-sm">
+          <!-- Generated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Related Posts -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">
+          <i class="fas fa-bookmark mr-2"></i>
+          Related Posts
+        </h3>
+        <div id="related-posts" class="space-y-4">
+          <div class="animate-pulse space-y-4">
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Navigation to Previous/Next Posts -->
+<div class="bg-gray-50 border-t border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="post-navigation">
+      <!-- Generated by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  generateTableOfContents();
+  loadComments();
+  loadRelatedPosts();
+  loadPostNavigation();
+  incrementViewCount();
+});
+
+function generateTableOfContents() {
+  const headings = document.querySelectorAll('.prose h2, .prose h3, .prose h4');
+  const toc = document.getElementById('table-of-contents');
+
+  if (headings.length === 0) {
+    toc.innerHTML = '<p class="text-gray-500 text-sm">No headings found</p>';
+    return;
+  }
+
+  const tocHTML = Array.from(headings).map((heading, index) => {
+    const id = heading.id || `heading-${index}`;
+    heading.id = id;
+
+    const level = parseInt(heading.tagName.charAt(1));
+    const indent = (level - 2) * 12; // 12px per level
+
+    return `
+      <a
+        href="#${id}"
+        class="block text-gray-600 hover:text-primary-600 transition-colors py-1"
+        style="margin-left: ${indent}px;"
+      >
+        ${heading.textContent}
+      </a>
+    `;
+  }).join('');
+
+  toc.innerHTML = tocHTML;
+}
+
+async function loadComments() {
+  try {
+    const response = await fetch(`/api/posts/<%= post.slug %>/comments`);
+    if (response.ok) {
+      const data = await response.json();
+      document.getElementById('comments-count').textContent = data.comments.length;
+      renderComments(data.comments);
+    }
+  } catch (error) {
+    console.error('Error loading comments:', error);
+  }
+}
+
+function renderComments(comments) {
+  const container = document.getElementById('comments-list');
+
+  if (comments.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 text-center py-8">No comments yet. Be the first to comment!</p>';
+    return;
+  }
+
+  container.innerHTML = comments.map(comment => `
+    <div class="flex space-x-4 py-4 border-b border-gray-200 last:border-b-0">
+      <div class="flex-shrink-0">
+        ${comment.author.avatar
+          ? `<img src="${comment.author.avatar}" alt="${comment.author.fullName || comment.author.username}" class="h-10 w-10 rounded-full">`
+          : `<div class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center">
+               <span class="text-sm font-medium text-white">${(comment.author.fullName || comment.author.username).charAt(0).toUpperCase()}</span>
+             </div>`
+        }
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center space-x-2 mb-1">
+          <p class="text-sm font-medium text-gray-900">${comment.author.fullName || comment.author.username}</p>
+          <p class="text-xs text-gray-500">${new Date(comment.createdAt).toLocaleDateString()}</p>
+        </div>
+        <p class="text-gray-700">${comment.content}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadRelatedPosts() {
+  try {
+    const response = await fetch(`/api/posts/<%= post.slug %>/related`);
+    if (response.ok) {
+      const data = await response.json();
+      renderRelatedPosts(data.posts);
+    }
+  } catch (error) {
+    console.error('Error loading related posts:', error);
+  }
+}
+
+function renderRelatedPosts(posts) {
+  const container = document.getElementById('related-posts');
+
+  if (posts.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 text-sm">No related posts found.</p>';
+    return;
+  }
+
+  container.innerHTML = posts.map(post => `
+    <div class="group">
+      <h4 class="text-sm font-medium text-gray-900 group-hover:text-primary-600 transition-colors mb-1">
+        <a href="/blog/${post.slug}">${post.title}</a>
+      </h4>
+      <p class="text-xs text-gray-500">
+        ${new Date(post.publishedAt || post.createdAt).toLocaleDateString()} • ${post.views || 0} views
+      </p>
+    </div>
+  `).join('');
+}
+
+async function loadPostNavigation() {
+  try {
+    const response = await fetch(`/api/posts/<%= post.slug %>/navigation`);
+    if (response.ok) {
+      const data = await response.json();
+      renderPostNavigation(data);
+    }
+  } catch (error) {
+    console.error('Error loading post navigation:', error);
+  }
+}
+
+function renderPostNavigation(nav) {
+  const container = document.getElementById('post-navigation');
+  let html = '';
+
+  if (nav.previous) {
+    html += `
+      <a href="/blog/${nav.previous.slug}" class="group flex items-center p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-primary-600 mb-1">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Previous Post
+          </p>
+          <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+            ${nav.previous.title}
+          </h3>
+        </div>
+      </a>
+    `;
+  }
+
+  if (nav.next) {
+    html += `
+      <a href="/blog/${nav.next.slug}" class="group flex items-center p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow text-right">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-primary-600 mb-1">
+            Next Post
+            <i class="fas fa-arrow-right ml-2"></i>
+          </p>
+          <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+            ${nav.next.title}
+          </h3>
+        </div>
+      </a>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+async function incrementViewCount() {
+  try {
+    await fetch(`/api/posts/<%= post.slug %>/view`, { method: 'POST' });
+  } catch (error) {
+    console.error('Error incrementing view count:', error);
+  }
+}
+
+// Social sharing functions
+function sharePost() {
+  if (navigator.share) {
+    navigator.share({
+      title: '<%= post.title %>',
+      text: '<%= post.excerpt || post.title %>',
+      url: window.location.href
+    });
+  } else {
+    copyToClipboard();
+  }
+}
+
+function shareOnTwitter() {
+  const text = encodeURIComponent('<%= post.title %>');
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+}
+
+function shareOnFacebook() {
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+}
+
+function shareOnLinkedIn() {
+  const url = encodeURIComponent(window.location.href);
+  const title = encodeURIComponent('<%= post.title %>');
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}`, '_blank');
+}
+
+function copyToClipboard() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    // You could show a toast notification here
+    alert('Link copied to clipboard!');
+  });
+}
+</script>
+
+<% } else { %>
+<!-- Post Not Found -->
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="text-center">
+    <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+      <i class="fas fa-file-alt text-6xl"></i>
+    </div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">Post Not Found</h1>
+    <p class="text-gray-600 mb-6">The post you're looking for doesn't exist or has been removed.</p>
+    <a
+      href="/blog"
+      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+    >
+      <i class="fas fa-arrow-left mr-2"></i>
+      Back to Blog
+    </a>
+  </div>
+</div>
+<% } %>
+
+        <%- include('../partials/footer') %>
+    </div>
+
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Include Marked.js for Markdown preview -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>

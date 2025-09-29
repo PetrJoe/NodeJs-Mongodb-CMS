@@ -1,0 +1,362 @@
+<%- include('../partials/head', {
+  title: 'Blog',
+  metaTags: '<meta name="description" content="Discover insights, tutorials, and stories from our community. Browse our latest blog posts and articles.">'
+}) %>
+
+<!-- Hero Section -->
+<div class="relative bg-gradient-to-r from-primary-600 to-primary-700 py-16">
+  <div class="absolute inset-0 bg-black opacity-20"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+      <i class="fas fa-blog mr-3"></i>
+      Blog
+    </h1>
+    <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+      Discover insights, tutorials, and stories from our community
+    </p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="lg:grid lg:grid-cols-4 lg:gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-3">
+      <!-- Search and Filter Bar -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8" x-data="{
+        searchTerm: '<%= locals.search || '' %>',
+        selectedCategory: '<%= locals.category || '' %>',
+        sortBy: '<%= locals.sort || 'latest' %>'
+      }">
+        <form @submit.prevent="window.location.href = `/blog?search=${encodeURIComponent(searchTerm)}&category=${selectedCategory}&sort=${sortBy}`" class="space-y-4 lg:space-y-0 lg:flex lg:items-end lg:space-x-4">
+          <div class="flex-1">
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search posts</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+              <input
+                type="text"
+                id="search"
+                x-model="searchTerm"
+                placeholder="Search by title, content, or tags..."
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+              >
+            </div>
+          </div>
+
+          <div class="sm:flex sm:space-x-4 space-y-4 sm:space-y-0">
+            <div>
+              <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+              <select
+                id="category"
+                x-model="selectedCategory"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="">All Categories</option>
+                <% if (locals.categories) { %>
+                  <% categories.forEach(category => { %>
+                    <option value="<%= category.slug %>"><%= category.name %></option>
+                  <% }); %>
+                <% } %>
+              </select>
+            </div>
+
+            <div>
+              <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
+              <select
+                id="sort"
+                x-model="sortBy"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+              >
+                <option value="latest">Latest</option>
+                <option value="oldest">Oldest</option>
+                <option value="popular">Most Popular</option>
+                <option value="title">Title A-Z</option>
+              </select>
+            </div>
+
+            <div class="flex items-end">
+              <button
+                type="submit"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              >
+                <i class="fas fa-filter mr-2"></i>
+                Filter
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Results Info -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="text-sm text-gray-600">
+          <% if (locals.search || locals.category) { %>
+            <span class="font-medium"><%= locals.totalPosts || 0 %></span> posts found
+            <% if (locals.search) { %>
+              for "<span class="font-medium"><%= locals.search %></span>"
+            <% } %>
+            <% if (locals.category) { %>
+              in "<span class="font-medium"><%= locals.categoryName %></span>"
+            <% } %>
+          <% } else { %>
+            <span class="font-medium"><%= locals.totalPosts || 0 %></span> total posts
+          <% } %>
+        </div>
+
+        <% if (locals.search || locals.category) { %>
+          <a href="/blog" class="text-sm text-primary-600 hover:text-primary-500 font-medium">
+            <i class="fas fa-times mr-1"></i>
+            Clear filters
+          </a>
+        <% } %>
+      </div>
+
+      <!-- Posts Grid -->
+      <% if (locals.posts && posts.length > 0) { %>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-1">
+          <% posts.forEach(post => { %>
+            <article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+              <div class="lg:flex">
+                <% if (post.featuredImage) { %>
+                  <div class="lg:w-64 lg:flex-shrink-0">
+                    <img
+                      src="<%= post.featuredImage %>"
+                      alt="<%= post.title %>"
+                      class="h-48 w-full object-cover lg:h-full"
+                    >
+                  </div>
+                <% } %>
+
+                <div class="p-6 flex flex-col justify-between <%= post.featuredImage ? 'lg:flex-1' : 'w-full' %>">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-2 mb-3">
+                      <% if (post.category) { %>
+                        <a
+                          href="/blog?category=<%= post.category.slug %>"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 hover:bg-primary-200 transition-colors"
+                        >
+                          <%= post.category.name %>
+                        </a>
+                      <% } %>
+
+                      <span class="text-xs text-gray-500">
+                        <%= new Date(post.publishedAt || post.createdAt).toLocaleDateString() %>
+                      </span>
+                    </div>
+
+                    <h2 class="text-xl font-bold text-gray-900 mb-3">
+                      <a href="/blog/<%= post.slug %>" class="hover:text-primary-600 transition-colors">
+                        <%= post.title %>
+                      </a>
+                    </h2>
+
+                    <p class="text-gray-600 mb-4 line-clamp-3">
+                      <%= post.excerpt || post.content.substring(0, 200) + '...' %>
+                    </p>
+
+                    <% if (post.tags && post.tags.length > 0) { %>
+                      <div class="flex flex-wrap gap-2 mb-4">
+                        <% post.tags.slice(0, 3).forEach(tag => { %>
+                          <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                            #<%= tag %>
+                          </span>
+                        <% }); %>
+                        <% if (post.tags.length > 3) { %>
+                          <span class="text-xs text-gray-500">+<%= post.tags.length - 3 %> more</span>
+                        <% } %>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                      <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-user mr-1"></i>
+                        <%= post.author.fullName || post.author.username %>
+                      </div>
+                      <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-eye mr-1"></i>
+                        <%= post.views || 0 %>
+                      </div>
+                      <div class="flex items-center text-sm text-gray-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        <%= Math.ceil((post.content.length || 0) / 200) %> min read
+                      </div>
+                    </div>
+
+                    <a
+                      href="/blog/<%= post.slug %>"
+                      class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors"
+                    >
+                      Read more
+                      <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (locals.pagination && pagination.totalPages > 1) { %>
+          <nav class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-8" aria-label="Pagination">
+            <div class="hidden sm:block">
+              <p class="text-sm text-gray-700">
+                Showing page <span class="font-medium"><%= pagination.currentPage %></span> of
+                <span class="font-medium"><%= pagination.totalPages %></span>
+              </p>
+            </div>
+            <div class="flex-1 flex justify-between sm:justify-end space-x-3">
+              <% if (pagination.currentPage > 1) { %>
+                <a
+                  href="?page=<%= pagination.currentPage - 1 %><%= locals.search ? '&search=' + encodeURIComponent(locals.search) : '' %><%= locals.category ? '&category=' + locals.category : '' %><%= locals.sort ? '&sort=' + locals.sort : '' %>"
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Previous
+                </a>
+              <% } %>
+
+              <% if (pagination.currentPage < pagination.totalPages) { %>
+                <a
+                  href="?page=<%= pagination.currentPage + 1 %><%= locals.search ? '&search=' + encodeURIComponent(locals.search) : '' %><%= locals.category ? '&category=' + locals.category : '' %><%= locals.sort ? '&sort=' + locals.sort : '' %>"
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Next
+                </a>
+              <% } %>
+            </div>
+          </nav>
+        <% } %>
+
+      <% } else { %>
+        <!-- Empty State -->
+        <div class="text-center py-16">
+          <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+            <i class="fas fa-search text-6xl"></i>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No posts found</h3>
+          <p class="text-gray-600 mb-6">
+            <% if (locals.search || locals.category) { %>
+              Try adjusting your search criteria or browse all posts.
+            <% } else { %>
+              There are no published posts yet. Check back later!
+            <% } %>
+          </p>
+          <% if (locals.search || locals.category) { %>
+            <a
+              href="/blog"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+            >
+              View all posts
+            </a>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 mt-12 lg:mt-0">
+      <!-- Popular Posts -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">
+          <i class="fas fa-fire text-orange-500 mr-2"></i>
+          Popular Posts
+        </h3>
+        <div class="space-y-4" id="popular-posts">
+          <div class="animate-pulse space-y-4">
+            <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">
+          <i class="fas fa-tags text-primary-600 mr-2"></i>
+          Categories
+        </h3>
+        <div class="space-y-2" id="categories-list">
+          <% if (locals.allCategories) { %>
+            <% allCategories.forEach(category => { %>
+              <a
+                href="/blog?category=<%= category.slug %>"
+                class="flex items-center justify-between text-gray-600 hover:text-primary-600 py-1 transition-colors <%= locals.category === category.slug ? 'text-primary-600 font-medium' : '' %>"
+              >
+                <span><%= category.name %></span>
+                <span class="text-sm text-gray-400">(<%= category.postCount || 0 %>)</span>
+              </a>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Tags Cloud -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">
+          <i class="fas fa-hashtag text-gray-600 mr-2"></i>
+          Popular Tags
+        </h3>
+        <div class="flex flex-wrap gap-2" id="tags-cloud">
+          <% if (locals.popularTags) { %>
+            <% popularTags.forEach(tag => { %>
+              <a
+                href="/blog?search=%23<%= tag.name %>"
+                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-primary-100 hover:text-primary-800 transition-colors"
+                style="font-size: <%= Math.max(0.75, Math.min(1.1, tag.count / 10 + 0.75)) %>rem;"
+              >
+                #<%= tag.name %>
+              </a>
+            <% }); %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  loadPopularPosts();
+});
+
+async function loadPopularPosts() {
+  try {
+    const response = await fetch('/api/posts/popular?limit=5');
+    if (response.ok) {
+      const data = await response.json();
+      const container = document.getElementById('popular-posts');
+
+      if (data.posts.length > 0) {
+        container.innerHTML = data.posts.map(post => `
+          <div class="flex space-x-3">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 hover:text-primary-600">
+                <a href="/blog/${post.slug}">${post.title}</a>
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                ${new Date(post.publishedAt || post.createdAt).toLocaleDateString()} • ${post.views || 0} views
+              </p>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        container.innerHTML = '<p class="text-sm text-gray-500">No popular posts yet.</p>';
+      }
+    }
+  } catch (error) {
+    console.error('Error loading popular posts:', error);
+  }
+}
+</script>
+
+        <%- include('../partials/footer') %>
+    </div>
+
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

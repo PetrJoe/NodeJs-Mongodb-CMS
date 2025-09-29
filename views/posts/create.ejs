@@ -1,0 +1,483 @@
+<div class="mb-8">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">Create New Post</h1>
+      <p class="text-gray-600">Write and publish your content to share with the world.</p>
+    </div>
+    <a
+      href="/admin/posts"
+      class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+    >
+      <i class="fas fa-arrow-left mr-2"></i>
+      Back to Posts
+    </a>
+  </div>
+</div>
+
+<form
+  action="/admin/posts/create"
+  method="POST"
+  enctype="multipart/form-data"
+  x-data="{
+    formData: {
+      title: '',
+      slug: '',
+      excerpt: '',
+      content: '',
+      category: '',
+      tags: '',
+      status: 'draft',
+      featuredImage: null,
+      publishedAt: ''
+    },
+    autoSlug: true,
+    saving: false,
+    previewMode: false,
+
+    generateSlug() {
+      if (this.autoSlug && this.formData.title) {
+        this.formData.slug = this.formData.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .trim();
+      }
+    },
+
+    togglePreview() {
+      this.previewMode = !this.previewMode;
+    },
+
+    async saveDraft() {
+      this.saving = true;
+      this.formData.status = 'draft';
+      // Submit form logic would go here
+      setTimeout(() => this.saving = false, 1000);
+    },
+
+    async publishNow() {
+      this.saving = true;
+      this.formData.status = 'published';
+      this.formData.publishedAt = new Date().toISOString();
+      // Submit form logic would go here
+      setTimeout(() => this.saving = false, 1000);
+    }
+  }"
+  class="space-y-8"
+>
+  <div class="bg-white shadow rounded-lg">
+    <div class="p-6">
+      <!-- Title & Slug -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+            Title *
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            x-model="formData.title"
+            @input="generateSlug()"
+            required
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            placeholder="Enter post title..."
+          >
+        </div>
+
+        <div>
+          <label for="slug" class="block text-sm font-medium text-gray-700 mb-2">
+            URL Slug *
+            <span class="text-xs text-gray-500">(auto-generated)</span>
+          </label>
+          <div class="flex">
+            <input
+              type="text"
+              id="slug"
+              name="slug"
+              x-model="formData.slug"
+              @input="autoSlug = false"
+              required
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="post-url-slug"
+            >
+            <button
+              type="button"
+              @click="autoSlug = true; generateSlug()"
+              class="px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500 hover:bg-gray-100"
+              title="Auto-generate slug"
+            >
+              <i class="fas fa-refresh"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Excerpt -->
+      <div class="mb-6">
+        <label for="excerpt" class="block text-sm font-medium text-gray-700 mb-2">
+          Excerpt
+          <span class="text-xs text-gray-500">(Brief summary for listings)</span>
+        </label>
+        <textarea
+          id="excerpt"
+          name="excerpt"
+          x-model="formData.excerpt"
+          rows="3"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          placeholder="Write a brief summary of your post..."
+        ></textarea>
+        <p class="mt-1 text-xs text-gray-500">
+          <span x-text="formData.excerpt.length"></span>/200 characters recommended
+        </p>
+      </div>
+
+      <!-- Content Editor -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-sm font-medium text-gray-700">
+            Content *
+          </label>
+          <div class="flex space-x-2">
+            <button
+              type="button"
+              @click="togglePreview()"
+              class="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <i :class="previewMode ? 'fas fa-edit' : 'fas fa-eye'" class="mr-1"></i>
+              <span x-text="previewMode ? 'Edit' : 'Preview'"></span>
+            </button>
+          </div>
+        </div>
+
+        <div x-show="!previewMode">
+          <textarea
+            id="content"
+            name="content"
+            x-model="formData.content"
+            rows="20"
+            required
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 font-mono text-sm"
+            placeholder="Write your post content using Markdown..."
+          ></textarea>
+          <p class="mt-1 text-xs text-gray-500">
+            Supports Markdown formatting. Use ## for headings, **bold**, *italic*, etc.
+          </p>
+        </div>
+
+        <div x-show="previewMode" class="border border-gray-300 rounded-md p-4 bg-gray-50 min-h-96">
+          <div class="prose max-w-none" x-html="formData.content ? marked(formData.content) : '<p class=&quot;text-gray-500&quot;>Preview will appear here...</p>'">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Settings -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Category & Tags -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Organization</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+              Category
+            </label>
+            <select
+              id="category"
+              name="category"
+              x-model="formData.category"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="">Select a category</option>
+              <% if (locals.categories) { %>
+                <% categories.forEach(category => { %>
+                  <option value="<%= category._id %>"><%= category.name %></option>
+                <% }); %>
+              <% } %>
+            </select>
+          </div>
+
+          <div>
+            <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">
+              Tags
+              <span class="text-xs text-gray-500">(comma-separated)</span>
+            </label>
+            <input
+              type="text"
+              id="tags"
+              name="tags"
+              x-model="formData.tags"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="technology, tutorial, javascript"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO Settings -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+          <i class="fas fa-search-plus mr-2"></i>
+          SEO Settings
+        </h3>
+
+        <div class="space-y-4">
+          <div>
+            <label for="metaTitle" class="block text-sm font-medium text-gray-700 mb-2">
+              Meta Title
+            </label>
+            <input
+              type="text"
+              id="metaTitle"
+              name="metaTitle"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="SEO-optimized title"
+            >
+          </div>
+
+          <div>
+            <label for="metaDescription" class="block text-sm font-medium text-gray-700 mb-2">
+              Meta Description
+            </label>
+            <textarea
+              id="metaDescription"
+              name="metaDescription"
+              rows="3"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Brief description for search engines (150-160 characters)"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Publishing Options -->
+    <div class="space-y-6">
+      <!-- Featured Image -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+          <i class="fas fa-image mr-2"></i>
+          Featured Image
+        </h3>
+
+        <div x-data="{
+          imagePreview: null,
+          dragOver: false,
+
+          handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+              this.previewImage(file);
+            }
+          },
+
+          handleDrop(event) {
+            event.preventDefault();
+            this.dragOver = false;
+            const file = event.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+              this.previewImage(file);
+              // Set the file input
+              document.getElementById('featuredImage').files = event.dataTransfer.files;
+            }
+          },
+
+          previewImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              this.imagePreview = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          },
+
+          removeImage() {
+            this.imagePreview = null;
+            document.getElementById('featuredImage').value = '';
+          }
+        }">
+          <div x-show="!imagePreview">
+            <div
+              @dragover.prevent="dragOver = true"
+              @dragleave.prevent="dragOver = false"
+              @drop.prevent="handleDrop"
+              :class="{ 'border-primary-300 bg-primary-50': dragOver }"
+              class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+            >
+              <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-3"></i>
+              <p class="text-sm text-gray-600 mb-2">Drop an image here or click to browse</p>
+              <input
+                type="file"
+                id="featuredImage"
+                name="featuredImage"
+                accept="image/*"
+                @change="handleFileSelect"
+                class="hidden"
+              >
+              <button
+                type="button"
+                @click="document.getElementById('featuredImage').click()"
+                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <i class="fas fa-folder-open mr-2"></i>
+                Choose File
+              </button>
+            </div>
+          </div>
+
+          <div x-show="imagePreview" class="relative">
+            <img :src="imagePreview" alt="Preview" class="w-full h-48 object-cover rounded-lg">
+            <button
+              type="button"
+              @click="removeImage()"
+              class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Publishing Options -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+          <i class="fas fa-paper-plane mr-2"></i>
+          Publishing
+        </h3>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select
+              name="status"
+              x-model="formData.status"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="scheduled">Scheduled</option>
+            </select>
+          </div>
+
+          <div x-show="formData.status === 'scheduled'">
+            <label for="publishedAt" class="block text-sm font-medium text-gray-700 mb-2">
+              Publish Date
+            </label>
+            <input
+              type="datetime-local"
+              id="publishedAt"
+              name="publishedAt"
+              x-model="formData.publishedAt"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            >
+          </div>
+
+          <div>
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                name="allowComments"
+                checked
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              >
+              <span class="ml-2 text-sm text-gray-700">Allow comments</span>
+            </label>
+          </div>
+
+          <div>
+            <label class="flex items-center">
+              <input
+                type="checkbox"
+                name="featured"
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              >
+              <span class="ml-2 text-sm text-gray-700">Mark as featured</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="bg-white shadow rounded-lg p-6">
+        <div class="space-y-3">
+          <button
+            type="button"
+            @click="saveDraft()"
+            :disabled="saving"
+            class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+          >
+            <i class="fas fa-save mr-2"></i>
+            <span x-text="saving ? 'Saving...' : 'Save Draft'"></span>
+          </button>
+
+          <button
+            type="submit"
+            name="action"
+            value="publish"
+            :disabled="saving"
+            class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+          >
+            <i class="fas fa-paper-plane mr-2"></i>
+            <span x-text="formData.status === 'scheduled' ? 'Schedule Post' : 'Publish Now'"></span>
+          </button>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            class="w-full text-sm text-gray-500 hover:text-gray-700"
+            onclick="window.history.back()"
+          >
+            <i class="fas fa-times mr-1"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Include Marked.js for Markdown preview -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-save functionality
+  let autoSaveTimeout;
+  const form = document.querySelector('form');
+
+  function autoSave() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+      // Save draft automatically
+      console.log('Auto-saving draft...');
+    }, 30000); // Auto-save every 30 seconds
+  }
+
+  // Add auto-save listeners
+  ['input', 'change'].forEach(event => {
+    form.addEventListener(event, autoSave);
+  });
+
+  // Warn about unsaved changes
+  let hasUnsavedChanges = false;
+  form.addEventListener('input', () => {
+    hasUnsavedChanges = true;
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  form.addEventListener('submit', () => {
+    hasUnsavedChanges = false;
+  });
+});
+</script>

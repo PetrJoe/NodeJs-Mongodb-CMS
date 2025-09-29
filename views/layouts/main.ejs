@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | CMS</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <%- locals.metaTags || '' %>
+</head>
+<body class="h-full bg-gray-50">
+    <div class="min-h-full">
+        <%- include('../partials/navbar') %>
+
+        <%- include('../partials/flash-messages') %>
+
+        <main class="<%= locals.mainClass || 'max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8' %>">
+            <%- body %>
+        </main>
+
+        <%- include('../partials/footer') %>
+    </div>
+
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+
+    <%- locals.scripts || '' %>
+</body>
+</html>

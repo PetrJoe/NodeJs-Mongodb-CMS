@@ -1,0 +1,88 @@
+create it in a monilith
+
+## **Day 1 – MongoDB & Node.js Essentials for CMS**
+
+**Goal:** Make sure students can design and interact with MongoDB effectively inside Node.js.
+
+### Morning Session (3 hrs)
+
+1. **Intro to MongoDB in a CMS Context**
+
+   * Why MongoDB for CMS (flexibility, schema design, content storage).
+   * NoSQL mindset vs SQL (collections, documents, dynamic schema).
+
+2. **Database Setup**
+
+   * Installing/connecting MongoDB locally & Atlas cloud setup.
+   * Mongoose ODM refresher (schemas, models, validations).
+
+3. **Schema Design for CMS**
+
+   * Content model (posts, pages, categories, tags, users).
+   * Relationships in MongoDB: references vs embedding.
+   * Versioning/soft deletes for CMS entries.
+
+### Afternoon Session (3 hrs)
+
+4. **CRUD Operations with MongoDB**
+
+   * Creating posts/pages.
+   * Updating content with validation.
+   * Soft delete vs hard delete.
+   * Querying with filters (e.g., category, published status).
+
+5. **Project Work**
+
+   * Students implement `Post` and `Category` models.
+   * Build routes for CRUD in Express with MongoDB.
+   * Test using Postman/Insomnia.
+
+---
+
+## **Day 2 – Advanced CMS Features with MongoDB**
+
+**Goal:** Implement richer CMS functionality and best practices.
+
+### Morning Session (3 hrs)
+
+6. **CMS Features**
+
+   * Role-based access control (admin vs editor).
+   * Content status: draft, published, archived.
+   * Slugs & search optimization in MongoDB.
+   * Pagination & sorting for posts.
+
+7. **File Uploads & Media Library**
+
+   * Storing metadata in MongoDB.
+   * File handling (Multer, GridFS vs cloud storage).
+
+### Afternoon Session (3 hrs)
+
+8. **CMS Dashboard & Views**
+
+   * Creating API endpoints for dashboard stats (post count, active users).
+   * Aggregations in MongoDB (group by category, count published posts).
+
+9. **Project Wrap-up**
+
+   * Students integrate features into CMS:
+
+     * CRUD posts + categories
+     * Draft/publish toggle
+     * Role-based access
+     * Simple dashboard
+
+10. **Deployment & Best Practices**
+
+* Environment variables for MongoDB.
+* Seeding database with initial content.
+* Common pitfalls (indexes, query optimization, schema evolution).
+
+---
+
+🎯 **Outcome:** By the end of Day 2, students will have a **mini CMS backend with MongoDB + Node.js** supporting posts, categories, roles, and a simple dashboard.
+
+---
+
+Would you like me to also prepare a **step-by-step lab guide (tasks + expected outcomes)** for each session so students can follow along hands-on?

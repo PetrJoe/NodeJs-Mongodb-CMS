@@ -1,0 +1,73 @@
+<footer class="bg-white border-t border-gray-200 mt-12">
+  <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="col-span-1 md:col-span-2">
+        <div class="flex items-center">
+          <i class="fas fa-blog text-primary-600 text-2xl mr-3"></i>
+          <span class="text-xl font-bold text-gray-900">CMS</span>
+        </div>
+        <p class="mt-4 text-gray-600 max-w-md">
+          A powerful and flexible content management system built with Node.js, Express, and MongoDB.
+          Create, manage, and publish your content with ease.
+        </p>
+        <div class="mt-6 flex space-x-6">
+          <a href="#" class="text-gray-400 hover:text-gray-500 transition-colors">
+            <span class="sr-only">Facebook</span>
+            <i class="fab fa-facebook-f text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-gray-500 transition-colors">
+            <span class="sr-only">Twitter</span>
+            <i class="fab fa-twitter text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-gray-500 transition-colors">
+            <span class="sr-only">LinkedIn</span>
+            <i class="fab fa-linkedin-in text-xl"></i>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-gray-500 transition-colors">
+            <span class="sr-only">GitHub</span>
+            <i class="fab fa-github text-xl"></i>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">
+          Navigation
+        </h3>
+        <ul class="space-y-3">
+          <li><a href="/" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Home</a></li>
+          <li><a href="/blog" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Blog</a></li>
+          <li><a href="/categories" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Categories</a></li>
+          <li><a href="/about" class="text-base text-gray-500 hover:text-gray-900 transition-colors">About</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">
+          Account
+        </h3>
+        <ul class="space-y-3">
+          <% if (user) { %>
+            <li><a href="/admin" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Dashboard</a></li>
+            <li><a href="/profile" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Profile</a></li>
+            <li><a href="/admin/posts/my" class="text-base text-gray-500 hover:text-gray-900 transition-colors">My Posts</a></li>
+          <% } else { %>
+            <li><a href="/auth/login" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Login</a></li>
+            <li><a href="/auth/register" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Register</a></li>
+          <% } %>
+          <li><a href="/contact" class="text-base text-gray-500 hover:text-gray-900 transition-colors">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-8 border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
+      <p class="text-base text-gray-400">
+        &copy; <%= new Date().getFullYear() %> CMS. All rights reserved.
+      </p>
+      <div class="mt-4 md:mt-0 flex space-x-6">
+        <a href="/privacy" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Privacy Policy</a>
+        <a href="/terms" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>

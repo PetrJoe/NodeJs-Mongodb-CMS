@@ -1,0 +1,325 @@
+<div class="mb-8">
+  <h1 class="text-2xl font-bold text-gray-900 mb-2">Dashboard</h1>
+  <p class="text-gray-600">Welcome back, <%= user.fullName || user.username %>! Here's an overview of your content.</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+            <i class="fas fa-file-alt text-white"></i>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Posts</dt>
+            <dd class="text-lg font-medium text-gray-900" id="total-posts">-</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+            <i class="fas fa-check-circle text-white"></i>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Published</dt>
+            <dd class="text-lg font-medium text-gray-900" id="published-posts">-</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+            <i class="fas fa-edit text-white"></i>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Drafts</dt>
+            <dd class="text-lg font-medium text-gray-900" id="draft-posts">-</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+            <i class="fas fa-eye text-white"></i>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Views</dt>
+            <dd class="text-lg font-medium text-gray-900" id="total-views">-</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if (user.role === 'admin' || user.role === 'editor') { %>
+<!-- Admin/Editor Statistics -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
+            <i class="fas fa-users text-white"></i>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+            <dd class="text-lg font-medium text-gray-900" id="total-users">-</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-pink-500 rounded-md flex items-center justify-center">
+            <i class="fas fa-tags text-white"></i>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Categories</dt>
+            <dd class="text-lg font-medium text-gray-900" id="total-categories">-</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white overflow-hidden shadow rounded-lg">
+    <div class="p-5">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+            <i class="fas fa-images text-white"></i>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Media Files</dt>
+            <dd class="text-lg font-medium text-gray-900" id="total-media">-</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Recent Posts -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">Recent Posts</h3>
+        <a href="/admin/posts" class="text-sm text-primary-600 hover:text-primary-500">View all</a>
+      </div>
+      <div id="recent-posts" class="space-y-3">
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Quick Actions</h3>
+      <div class="space-y-3">
+        <a href="/admin/posts/create" class="w-full inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+          <i class="fas fa-plus mr-2"></i>
+          Create New Post
+        </a>
+
+        <% if (user.role === 'admin' || user.role === 'editor') { %>
+        <a href="/admin/categories/create" class="w-full inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+          <i class="fas fa-tag mr-2"></i>
+          Add Category
+        </a>
+        <% } %>
+
+        <a href="/admin/media" class="w-full inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+          <i class="fas fa-upload mr-2"></i>
+          Upload Media
+        </a>
+
+        <a href="/profile" class="w-full inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors">
+          <i class="fas fa-user mr-2"></i>
+          Edit Profile
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if (user.role === 'admin' || user.role === 'editor') { %>
+<!-- Analytics Chart -->
+<div class="mt-8">
+  <div class="bg-white shadow rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Content Growth</h3>
+      <div class="h-64">
+        <canvas id="contentChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Load dashboard statistics
+  loadDashboardStats();
+
+  <% if (user.role === 'admin' || user.role === 'editor') { %>
+  // Load analytics chart
+  loadContentChart();
+  <% } %>
+});
+
+async function loadDashboardStats() {
+  try {
+    const response = await fetch('/api/dashboard/content-stats', {
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      document.getElementById('total-posts').textContent = data.userStats.totalPosts;
+      document.getElementById('published-posts').textContent = data.userStats.published;
+      document.getElementById('draft-posts').textContent = data.userStats.drafts;
+      document.getElementById('total-views').textContent = data.userStats.totalViews;
+
+      // Load recent posts
+      loadRecentPosts(data.topContent.posts);
+    }
+
+    <% if (user.role === 'admin' || user.role === 'editor') { %>
+    // Load admin stats
+    const adminResponse = await fetch('/api/dashboard/stats', {
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }
+    });
+
+    if (adminResponse.ok) {
+      const adminData = await adminResponse.json();
+
+      document.getElementById('total-users').textContent = adminData.stats.users.total;
+      document.getElementById('total-categories').textContent = adminData.stats.categories.total;
+      document.getElementById('total-media').textContent = adminData.stats.media.total;
+    }
+    <% } %>
+  } catch (error) {
+    console.error('Error loading dashboard stats:', error);
+  }
+}
+
+function loadRecentPosts(posts) {
+  const container = document.getElementById('recent-posts');
+
+  if (posts.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 text-sm">No posts yet. <a href="/admin/posts/create" class="text-primary-600 hover:text-primary-500">Create your first post</a></p>';
+    return;
+  }
+
+  container.innerHTML = posts.map(post => `
+    <div class="flex items-start space-x-3">
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-900 truncate">
+          <a href="/admin/posts/${post._id}/edit" class="hover:text-primary-600">${post.title}</a>
+        </p>
+        <p class="text-sm text-gray-500">
+          ${new Date(post.publishedAt || post.createdAt).toLocaleDateString()} • ${post.views} views
+        </p>
+      </div>
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+        post.status === 'published' ? 'bg-green-100 text-green-800' :
+        post.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+        'bg-gray-100 text-gray-800'
+      }">
+        ${post.status}
+      </span>
+    </div>
+  `).join('');
+}
+
+<% if (user.role === 'admin' || user.role === 'editor') { %>
+async function loadContentChart() {
+  try {
+    const response = await fetch('/api/dashboard/analytics?type=posts&period=30', {
+      headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      const ctx = document.getElementById('contentChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.analytics.map(item => new Date(item.date).toLocaleDateString()),
+          datasets: [{
+            label: 'Posts Created',
+            data: data.analytics.map(item => item.count),
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error loading content chart:', error);
+  }
+}
+<% } %>
+</script>

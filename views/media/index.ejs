@@ -1,0 +1,889 @@
+<div class="mb-8">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">Media Library</h1>
+      <p class="text-gray-600">Manage your images, documents, and other media files.</p>
+    </div>
+    <button
+      onclick="openUploadModal()"
+      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors"
+    >
+      <i class="fas fa-upload mr-2"></i>
+      Upload Files
+    </button>
+  </div>
+</div>
+
+<!-- Upload Progress -->
+<div id="upload-progress" class="hidden mb-6">
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-sm font-medium text-gray-700">Uploading files...</span>
+      <span class="text-sm text-gray-500" id="upload-count">0 / 0</span>
+    </div>
+    <div class="w-full bg-gray-200 rounded-full h-2">
+      <div id="upload-bar" class="bg-primary-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="bg-white shadow rounded-lg p-6 mb-8" x-data="{
+  searchTerm: '',
+  fileType: 'all',
+  sortBy: 'newest',
+  viewMode: 'grid'
+}">
+  <div class="flex flex-col lg:flex-row gap-4">
+    <div class="flex-1">
+      <label for="search" class="sr-only">Search files</label>
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-search text-gray-400"></i>
+        </div>
+        <input
+          type="text"
+          id="search"
+          x-model="searchTerm"
+          @input="filterMedia()"
+          placeholder="Search by filename, alt text, or description..."
+          class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+        >
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+      <select
+        x-model="fileType"
+        @change="filterMedia()"
+        class="block px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+      >
+        <option value="all">All Files</option>
+        <option value="image">Images</option>
+        <option value="document">Documents</option>
+        <option value="video">Videos</option>
+        <option value="audio">Audio</option>
+        <option value="other">Other</option>
+      </select>
+
+      <select
+        x-model="sortBy"
+        @change="filterMedia()"
+        class="block px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+      >
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="name">Name A-Z</option>
+        <option value="size">File Size</option>
+      </select>
+
+      <div class="flex items-center space-x-2 border border-gray-300 rounded-md p-1">
+        <button
+          @click="viewMode = 'grid'"
+          :class="{ 'bg-primary-100 text-primary-600': viewMode === 'grid' }"
+          class="p-1 rounded text-gray-500 hover:text-gray-700"
+          title="Grid View"
+        >
+          <i class="fas fa-th"></i>
+        </button>
+        <button
+          @click="viewMode = 'list'"
+          :class="{ 'bg-primary-100 text-primary-600': viewMode === 'list' }"
+          class="p-1 rounded text-gray-500 hover:text-gray-700"
+          title="List View"
+        >
+          <i class="fas fa-list"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  <div x-data="{ selectedFiles: [], showBulkActions: false }" class="mt-4 pt-4 border-t border-gray-200">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <label class="flex items-center">
+          <input
+            type="checkbox"
+            @change="toggleSelectAll($event)"
+            class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          >
+          <span class="ml-2 text-sm text-gray-700">Select All</span>
+        </label>
+
+        <div x-show="selectedFiles.length > 0" class="flex items-center space-x-2">
+          <span class="text-sm text-gray-500" x-text="`${selectedFiles.length} selected`"></span>
+          <button
+            @click="showBulkActions = !showBulkActions"
+            class="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <i class="fas fa-ellipsis-h mr-1"></i>
+            Actions
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-500">
+          <span id="media-count">0</span> files • <span id="total-size">0 MB</span>
+        </span>
+        <button
+          onclick="refreshMedia()"
+          class="p-1 text-gray-400 hover:text-gray-600"
+          title="Refresh"
+        >
+          <i class="fas fa-refresh"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bulk Actions Dropdown -->
+    <div x-show="showBulkActions" @click.away="showBulkActions = false" class="relative mt-2">
+      <div class="absolute left-0 z-10 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        <div class="py-1">
+          <button
+            @click="bulkDownload()"
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            <i class="fas fa-download mr-2"></i>
+            Download Selected
+          </button>
+          <button
+            @click="bulkMove()"
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            <i class="fas fa-folder mr-2"></i>
+            Move to Folder
+          </button>
+          <button
+            @click="bulkDelete()"
+            class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+          >
+            <i class="fas fa-trash mr-2"></i>
+            Delete Selected
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Media Grid/List -->
+<div class="bg-white shadow rounded-lg p-6">
+  <!-- Grid View -->
+  <div
+    id="media-grid"
+    class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+    x-show="viewMode === 'grid'"
+  >
+    <!-- Loading state -->
+    <% for (let i = 0; i < 12; i++) { %>
+      <div class="media-item-skeleton animate-pulse">
+        <div class="aspect-square bg-gray-200 rounded-lg mb-2"></div>
+        <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- List View -->
+  <div id="media-list" class="hidden" x-show="viewMode === 'list'">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="relative px-6 py-3">
+              <input
+                type="checkbox"
+                class="absolute left-4 top-1/2 -mt-2 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              >
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              File
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Type
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Size
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Uploaded
+            </th>
+            <th scope="col" class="relative px-6 py-3">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="media-table-body" class="bg-white divide-y divide-gray-200">
+          <!-- Table content will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div id="empty-state" class="text-center py-16" style="display: none;">
+    <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+      <i class="fas fa-images text-6xl"></i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No media files found</h3>
+    <p class="text-gray-600 mb-6">Get started by uploading your first file.</p>
+    <button
+      onclick="openUploadModal()"
+      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+    >
+      <i class="fas fa-upload mr-2"></i>
+      Upload Files
+    </button>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div
+  id="upload-modal"
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+  style="display: none;"
+>
+  <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">Upload Files</h3>
+        <button onclick="closeUploadModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div
+        id="drop-zone"
+        class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors"
+        ondrop="handleDrop(event)"
+        ondragover="handleDragOver(event)"
+        ondragleave="handleDragLeave(event)"
+      >
+        <div class="mb-4">
+          <i class="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+        </div>
+        <p class="text-lg text-gray-600 mb-2">Drop files here or click to browse</p>
+        <p class="text-sm text-gray-500 mb-4">
+          Supports: Images (JPG, PNG, GIF, WebP), Documents (PDF, DOC, DOCX), Videos (MP4, MOV), Audio (MP3, WAV)
+        </p>
+        <input
+          type="file"
+          id="file-input"
+          multiple
+          accept="image/*,application/pdf,.doc,.docx,video/*,audio/*"
+          onchange="handleFileSelect(event)"
+          class="hidden"
+        >
+        <button
+          onclick="document.getElementById('file-input').click()"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <i class="fas fa-folder-open mr-2"></i>
+          Choose Files
+        </button>
+      </div>
+
+      <!-- Upload Options -->
+      <div class="mt-6">
+        <h4 class="text-sm font-medium text-gray-900 mb-3">Upload Options</h4>
+        <div class="space-y-3">
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              id="optimize-images"
+              checked
+              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            >
+            <span class="ml-2 text-sm text-gray-700">Optimize images for web</span>
+          </label>
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              id="generate-thumbnails"
+              checked
+              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            >
+            <span class="ml-2 text-sm text-gray-700">Generate thumbnails</span>
+          </label>
+          <label class="flex items-center">
+            <input
+              type="checkbox"
+              id="extract-metadata"
+              checked
+              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            >
+            <span class="ml-2 text-sm text-gray-700">Extract metadata</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- File Queue -->
+      <div id="file-queue" class="mt-6" style="display: none;">
+        <h4 class="text-sm font-medium text-gray-900 mb-3">Files to Upload</h4>
+        <div id="file-list" class="space-y-2 max-h-48 overflow-y-auto">
+          <!-- File items will be added here -->
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+        <button
+          onclick="closeUploadModal()"
+          class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Cancel
+        </button>
+        <button
+          id="upload-button"
+          onclick="startUpload()"
+          disabled
+          class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <i class="fas fa-upload mr-2"></i>
+          Upload Files
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- File Details Modal -->
+<div
+  id="file-details-modal"
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+  style="display: none;"
+>
+  <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-900">File Details</h3>
+        <button onclick="closeFileDetailsModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div id="file-details-content">
+        <!-- Content will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let mediaFiles = [];
+let filteredFiles = [];
+let selectedFiles = [];
+let uploadQueue = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadMediaFiles();
+});
+
+async function loadMediaFiles() {
+  try {
+    const response = await fetch('/api/media');
+    if (response.ok) {
+      const data = await response.json();
+      mediaFiles = data.files;
+      filteredFiles = [...mediaFiles];
+      renderMedia();
+      updateStats();
+    }
+  } catch (error) {
+    console.error('Error loading media files:', error);
+  }
+}
+
+function filterMedia() {
+  const searchTerm = document.getElementById('search').value.toLowerCase();
+  const fileType = document.querySelector('[x-model="fileType"]').value;
+  const sortBy = document.querySelector('[x-model="sortBy"]').value;
+
+  filteredFiles = mediaFiles.filter(file => {
+    const matchesSearch = !searchTerm ||
+      file.filename.toLowerCase().includes(searchTerm) ||
+      (file.altText && file.altText.toLowerCase().includes(searchTerm)) ||
+      (file.description && file.description.toLowerCase().includes(searchTerm));
+
+    const matchesType = fileType === 'all' || file.type.startsWith(fileType);
+
+    return matchesSearch && matchesType;
+  });
+
+  // Sort files
+  filteredFiles.sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.uploadedAt) - new Date(a.uploadedAt);
+      case 'oldest':
+        return new Date(a.uploadedAt) - new Date(b.uploadedAt);
+      case 'name':
+        return a.filename.localeCompare(b.filename);
+      case 'size':
+        return b.size - a.size;
+      default:
+        return 0;
+    }
+  });
+
+  renderMedia();
+  updateStats();
+}
+
+function renderMedia() {
+  const grid = document.getElementById('media-grid');
+  const list = document.getElementById('media-list');
+  const emptyState = document.getElementById('empty-state');
+
+  if (filteredFiles.length === 0) {
+    grid.style.display = 'none';
+    list.style.display = 'none';
+    emptyState.style.display = 'block';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+
+  // Clear loading skeletons
+  document.querySelectorAll('.media-item-skeleton').forEach(el => el.remove());
+
+  renderGridView();
+  renderListView();
+}
+
+function renderGridView() {
+  const grid = document.getElementById('media-grid');
+
+  grid.innerHTML = filteredFiles.map(file => `
+    <div class="group relative">
+      <input
+        type="checkbox"
+        value="${file._id}"
+        class="absolute top-2 left-2 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded z-10 file-checkbox"
+        onchange="toggleFileSelection('${file._id}')"
+      >
+
+      <div
+        class="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent group-hover:border-primary-300 transition-colors"
+        onclick="openFileDetails('${file._id}')"
+      >
+        ${getFilePreview(file)}
+      </div>
+
+      <div class="mt-2">
+        <p class="text-xs font-medium text-gray-900 truncate" title="${file.filename}">
+          ${file.filename}
+        </p>
+        <p class="text-xs text-gray-500">
+          ${formatFileSize(file.size)}
+        </p>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div class="flex space-x-1">
+          <button
+            onclick="copyFileUrl('${file._id}')"
+            class="p-1 bg-white rounded shadow hover:bg-gray-50"
+            title="Copy URL"
+          >
+            <i class="fas fa-copy text-xs"></i>
+          </button>
+          <button
+            onclick="downloadFile('${file._id}')"
+            class="p-1 bg-white rounded shadow hover:bg-gray-50"
+            title="Download"
+          >
+            <i class="fas fa-download text-xs"></i>
+          </button>
+          <button
+            onclick="deleteFile('${file._id}')"
+            class="p-1 bg-white rounded shadow hover:bg-red-50 text-red-600"
+            title="Delete"
+          >
+            <i class="fas fa-trash text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderListView() {
+  const tbody = document.getElementById('media-table-body');
+
+  tbody.innerHTML = filteredFiles.map(file => `
+    <tr class="hover:bg-gray-50">
+      <td class="px-6 py-4 whitespace-nowrap">
+        <input
+          type="checkbox"
+          value="${file._id}"
+          class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded file-checkbox"
+          onchange="toggleFileSelection('${file._id}')"
+        >
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 h-10 w-10">
+            ${getFileIcon(file)}
+          </div>
+          <div class="ml-4">
+            <div class="text-sm font-medium text-gray-900 cursor-pointer hover:text-primary-600" onclick="openFileDetails('${file._id}')">
+              ${file.filename}
+            </div>
+            <div class="text-sm text-gray-500">
+              ${file.altText || 'No alt text'}
+            </div>
+          </div>
+        </div>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getFileTypeClass(file.type)}">
+          ${getFileTypeName(file.type)}
+        </span>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        ${formatFileSize(file.size)}
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        ${new Date(file.uploadedAt).toLocaleDateString()}
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div class="flex items-center justify-end space-x-2">
+          <button
+            onclick="copyFileUrl('${file._id}')"
+            class="text-primary-600 hover:text-primary-900"
+          >
+            Copy
+          </button>
+          <button
+            onclick="downloadFile('${file._id}')"
+            class="text-green-600 hover:text-green-900"
+          >
+            Download
+          </button>
+          <button
+            onclick="deleteFile('${file._id}')"
+            class="text-red-600 hover:text-red-900"
+          >
+            Delete
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function getFilePreview(file) {
+  if (file.type.startsWith('image/')) {
+    return `<img src="${file.thumbnailUrl || file.url}" alt="${file.altText || file.filename}" class="w-full h-full object-cover">`;
+  } else {
+    return `<div class="w-full h-full flex items-center justify-center bg-gray-200">
+      ${getFileIcon(file)}
+    </div>`;
+  }
+}
+
+function getFileIcon(file) {
+  const iconClass = getFileIconClass(file.type);
+  return `<i class="${iconClass} text-2xl text-gray-500"></i>`;
+}
+
+function getFileIconClass(mimeType) {
+  if (mimeType.startsWith('image/')) return 'fas fa-image';
+  if (mimeType.startsWith('video/')) return 'fas fa-video';
+  if (mimeType.startsWith('audio/')) return 'fas fa-music';
+  if (mimeType.includes('pdf')) return 'fas fa-file-pdf';
+  if (mimeType.includes('word') || mimeType.includes('document')) return 'fas fa-file-word';
+  if (mimeType.includes('sheet') || mimeType.includes('excel')) return 'fas fa-file-excel';
+  return 'fas fa-file';
+}
+
+function getFileTypeName(mimeType) {
+  if (mimeType.startsWith('image/')) return 'Image';
+  if (mimeType.startsWith('video/')) return 'Video';
+  if (mimeType.startsWith('audio/')) return 'Audio';
+  if (mimeType.includes('pdf')) return 'PDF';
+  if (mimeType.includes('word')) return 'Word';
+  if (mimeType.includes('excel')) return 'Excel';
+  return 'File';
+}
+
+function getFileTypeClass(mimeType) {
+  if (mimeType.startsWith('image/')) return 'bg-blue-100 text-blue-800';
+  if (mimeType.startsWith('video/')) return 'bg-purple-100 text-purple-800';
+  if (mimeType.startsWith('audio/')) return 'bg-green-100 text-green-800';
+  if (mimeType.includes('pdf')) return 'bg-red-100 text-red-800';
+  return 'bg-gray-100 text-gray-800';
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function updateStats() {
+  document.getElementById('media-count').textContent = filteredFiles.length;
+  const totalSize = filteredFiles.reduce((sum, file) => sum + file.size, 0);
+  document.getElementById('total-size').textContent = formatFileSize(totalSize);
+}
+
+// Upload functionality
+function openUploadModal() {
+  document.getElementById('upload-modal').style.display = 'block';
+}
+
+function closeUploadModal() {
+  document.getElementById('upload-modal').style.display = 'none';
+  uploadQueue = [];
+  document.getElementById('file-queue').style.display = 'none';
+  document.getElementById('upload-button').disabled = true;
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  const files = Array.from(event.dataTransfer.files);
+  addFilesToQueue(files);
+}
+
+function handleDragOver(event) {
+  event.preventDefault();
+  event.currentTarget.classList.add('border-primary-300', 'bg-primary-50');
+}
+
+function handleDragLeave(event) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('border-primary-300', 'bg-primary-50');
+}
+
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files);
+  addFilesToQueue(files);
+}
+
+function addFilesToQueue(files) {
+  uploadQueue = [...uploadQueue, ...files];
+  renderFileQueue();
+  document.getElementById('upload-button').disabled = uploadQueue.length === 0;
+}
+
+function renderFileQueue() {
+  const queue = document.getElementById('file-queue');
+  const list = document.getElementById('file-list');
+
+  if (uploadQueue.length === 0) {
+    queue.style.display = 'none';
+    return;
+  }
+
+  queue.style.display = 'block';
+  list.innerHTML = uploadQueue.map((file, index) => `
+    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+      <div class="flex items-center space-x-3">
+        <i class="${getFileIconClass(file.type)} text-gray-500"></i>
+        <div>
+          <p class="text-sm font-medium text-gray-900">${file.name}</p>
+          <p class="text-xs text-gray-500">${formatFileSize(file.size)}</p>
+        </div>
+      </div>
+      <button
+        onclick="removeFromQueue(${index})"
+        class="text-red-500 hover:text-red-700"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+function removeFromQueue(index) {
+  uploadQueue.splice(index, 1);
+  renderFileQueue();
+  document.getElementById('upload-button').disabled = uploadQueue.length === 0;
+}
+
+async function startUpload() {
+  // Implementation would handle file uploads
+  console.log('Starting upload of', uploadQueue.length, 'files');
+  closeUploadModal();
+  loadMediaFiles(); // Refresh the media library
+}
+
+// File management functions
+function toggleFileSelection(fileId) {
+  const index = selectedFiles.indexOf(fileId);
+  if (index > -1) {
+    selectedFiles.splice(index, 1);
+  } else {
+    selectedFiles.push(fileId);
+  }
+}
+
+function openFileDetails(fileId) {
+  const file = mediaFiles.find(f => f._id === fileId);
+  if (!file) return;
+
+  const modal = document.getElementById('file-details-modal');
+  const content = document.getElementById('file-details-content');
+
+  content.innerHTML = `
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div>
+        <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+          ${getFilePreview(file)}
+        </div>
+        <div class="flex space-x-2">
+          <button
+            onclick="copyFileUrl('${file._id}')"
+            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <i class="fas fa-copy mr-2"></i>
+            Copy URL
+          </button>
+          <button
+            onclick="downloadFile('${file._id}')"
+            class="flex-1 inline-flex justify-center items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <i class="fas fa-download mr-2"></i>
+            Download
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <form onsubmit="updateFileDetails(event, '${file._id}')" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Filename</label>
+            <input
+              type="text"
+              value="${file.filename}"
+              name="filename"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Alt Text</label>
+            <input
+              type="text"
+              value="${file.altText || ''}"
+              name="altText"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Describe this image for accessibility"
+            >
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              name="description"
+              rows="3"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Optional description"
+            >${file.description || ''}</textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">File Size</label>
+              <p class="text-sm text-gray-900">${formatFileSize(file.size)}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <p class="text-sm text-gray-900">${file.type}</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Uploaded</label>
+            <p class="text-sm text-gray-900">${new Date(file.uploadedAt).toLocaleString()}</p>
+          </div>
+
+          <div class="flex justify-between pt-4">
+            <button
+              type="button"
+              onclick="deleteFile('${file._id}')"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+            >
+              <i class="fas fa-trash mr-2"></i>
+              Delete File
+            </button>
+            <button
+              type="submit"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+            >
+              <i class="fas fa-save mr-2"></i>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  modal.style.display = 'block';
+}
+
+function closeFileDetailsModal() {
+  document.getElementById('file-details-modal').style.display = 'none';
+}
+
+async function updateFileDetails(event, fileId) {
+  event.preventDefault();
+  // Implementation would update file details
+  console.log('Updating file details for', fileId);
+  closeFileDetailsModal();
+  loadMediaFiles();
+}
+
+async function copyFileUrl(fileId) {
+  const file = mediaFiles.find(f => f._id === fileId);
+  if (file) {
+    await navigator.clipboard.writeText(file.url);
+    // Show toast notification
+    console.log('URL copied to clipboard');
+  }
+}
+
+async function downloadFile(fileId) {
+  const file = mediaFiles.find(f => f._id === fileId);
+  if (file) {
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.download = file.filename;
+    link.click();
+  }
+}
+
+async function deleteFile(fileId) {
+  if (!confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/media/${fileId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    if (response.ok) {
+      closeFileDetailsModal();
+      loadMediaFiles();
+    } else {
+      alert('Error deleting file');
+    }
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    alert('Error deleting file');
+  }
+}
+
+function refreshMedia() {
+  loadMediaFiles();
+}
+</script>

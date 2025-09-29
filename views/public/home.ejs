@@ -1,0 +1,407 @@
+<%- include('../partials/head', {
+  title: 'Home',
+  metaTags: '<meta name="description" content="Welcome to our powerful content management system. Create, manage, and publish your content with ease.">'
+}) %>
+
+<!-- Hero Section -->
+<div class="relative bg-gradient-to-r from-primary-600 to-primary-700 overflow-hidden">
+  <div class="absolute inset-0">
+    <div class="absolute inset-0 bg-black opacity-25"></div>
+    <!-- Optional: Add a background pattern -->
+    <div class="absolute inset-0 bg-gradient-to-br from-transparent to-black opacity-20"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+    <div class="text-center">
+      <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+        Welcome to <span class="text-primary-200">CMS</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-primary-100 mb-8 max-w-3xl mx-auto leading-relaxed">
+        A powerful and intuitive content management system built for creators, writers, and teams who want to share their stories with the world.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a
+          href="/blog"
+          class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-primary-700 bg-white hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          <i class="fas fa-book-open mr-3"></i>
+          Explore Blog
+        </a>
+
+        <% if (!user) { %>
+          <a
+            href="/auth/register"
+            class="inline-flex items-center px-8 py-4 border-2 border-white text-lg font-medium rounded-lg text-white hover:bg-white hover:text-primary-700 transition-all duration-200"
+          >
+            <i class="fas fa-user-plus mr-3"></i>
+            Get Started
+          </a>
+        <% } else { %>
+          <a
+            href="/admin"
+            class="inline-flex items-center px-8 py-4 border-2 border-white text-lg font-medium rounded-lg text-white hover:bg-white hover:text-primary-700 transition-all duration-200"
+          >
+            <i class="fas fa-tachometer-alt mr-3"></i>
+            Dashboard
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating elements for visual appeal -->
+  <div class="absolute top-20 left-10 w-20 h-20 bg-white bg-opacity-10 rounded-full blur-xl"></div>
+  <div class="absolute bottom-20 right-10 w-32 h-32 bg-primary-300 bg-opacity-20 rounded-full blur-2xl"></div>
+</div>
+
+<!-- Features Section -->
+<div class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Why Choose Our CMS?
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Built with modern technology and designed for ease of use, our CMS provides everything you need to create and manage content effectively.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <div class="text-center group">
+        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-200 transition-colors">
+          <i class="fas fa-edit text-2xl text-primary-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Easy Content Creation</h3>
+        <p class="text-gray-600 leading-relaxed">
+          Intuitive editor with Markdown support, live preview, and rich formatting options. Write and publish content effortlessly.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="text-center group">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
+          <i class="fas fa-mobile-alt text-2xl text-green-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Responsive Design</h3>
+        <p class="text-gray-600 leading-relaxed">
+          Beautiful, mobile-first design that looks great on all devices. Your content shines everywhere.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="text-center group">
+        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
+          <i class="fas fa-users text-2xl text-purple-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Team Collaboration</h3>
+        <p class="text-gray-600 leading-relaxed">
+          Role-based access control, collaborative editing, and workflow management for teams of any size.
+        </p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="text-center group">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-orange-200 transition-colors">
+          <i class="fas fa-search text-2xl text-orange-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">SEO Optimized</h3>
+        <p class="text-gray-600 leading-relaxed">
+          Built-in SEO tools, meta tag management, and clean URLs to help your content rank better in search engines.
+        </p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="text-center group">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-red-200 transition-colors">
+          <i class="fas fa-chart-line text-2xl text-red-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Analytics & Insights</h3>
+        <p class="text-gray-600 leading-relaxed">
+          Track your content performance with built-in analytics, view counts, and engagement metrics.
+        </p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="text-center group">
+        <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-indigo-200 transition-colors">
+          <i class="fas fa-shield-alt text-2xl text-indigo-600"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Secure & Reliable</h3>
+        <p class="text-gray-600 leading-relaxed">
+          Enterprise-grade security, regular backups, and reliable hosting ensure your content is always safe and accessible.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Latest Posts Section -->
+<div class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-12">
+      <div>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Latest Posts
+        </h2>
+        <p class="text-xl text-gray-600">
+          Discover our most recent content and insights
+        </p>
+      </div>
+      <a
+        href="/blog"
+        class="inline-flex items-center text-primary-600 hover:text-primary-500 font-medium transition-colors"
+      >
+        View all posts
+        <i class="fas fa-arrow-right ml-2"></i>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="latest-posts">
+      <!-- Loading state -->
+      <div class="space-y-8">
+        <% for (let i = 0; i < 3; i++) { %>
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+            <div class="h-48 bg-gray-200"></div>
+            <div class="p-6">
+              <div class="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
+              <div class="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+              <div class="space-y-2">
+                <div class="h-3 bg-gray-200 rounded"></div>
+                <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+              </div>
+              <div class="flex items-center mt-4 space-x-3">
+                <div class="h-8 w-8 bg-gray-200 rounded-full"></div>
+                <div class="h-3 bg-gray-200 rounded w-1/3"></div>
+              </div>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="py-16 bg-primary-600">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+        Growing Community
+      </h2>
+      <p class="text-xl text-primary-100">
+        Join thousands of creators sharing their stories
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="text-center">
+        <div class="text-4xl md:text-5xl font-bold text-white mb-2" id="stat-posts">-</div>
+        <div class="text-primary-200 font-medium">Published Posts</div>
+      </div>
+      <div class="text-center">
+        <div class="text-4xl md:text-5xl font-bold text-white mb-2" id="stat-authors">-</div>
+        <div class="text-primary-200 font-medium">Active Authors</div>
+      </div>
+      <div class="text-center">
+        <div class="text-4xl md:text-5xl font-bold text-white mb-2" id="stat-categories">-</div>
+        <div class="text-primary-200 font-medium">Categories</div>
+      </div>
+      <div class="text-center">
+        <div class="text-4xl md:text-5xl font-bold text-white mb-2" id="stat-views">-</div>
+        <div class="text-primary-200 font-medium">Total Views</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA Section -->
+<div class="py-16 bg-white">
+  <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+      Ready to Start Creating?
+    </h2>
+    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+      Join our community of creators and start sharing your unique perspective with the world.
+      It takes less than a minute to get started.
+    </p>
+
+    <% if (!user) { %>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/auth/register"
+          class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          <i class="fas fa-rocket mr-3"></i>
+          Create Account
+        </a>
+        <a
+          href="/auth/login"
+          class="inline-flex items-center px-8 py-4 border-2 border-primary-600 text-lg font-medium rounded-lg text-primary-600 hover:bg-primary-600 hover:text-white transition-all duration-200"
+        >
+          <i class="fas fa-sign-in-alt mr-3"></i>
+          Sign In
+        </a>
+      </div>
+    <% } else { %>
+      <a
+        href="/admin/posts/create"
+        class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+      >
+        <i class="fas fa-plus mr-3"></i>
+        Write Your First Post
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  loadLatestPosts();
+  loadSiteStatistics();
+});
+
+async function loadLatestPosts() {
+  try {
+    const response = await fetch('/api/posts/latest?limit=3');
+    if (response.ok) {
+      const data = await response.json();
+      renderLatestPosts(data.posts);
+    }
+  } catch (error) {
+    console.error('Error loading latest posts:', error);
+  }
+}
+
+function renderLatestPosts(posts) {
+  const container = document.getElementById('latest-posts');
+
+  if (posts.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-3 text-center py-12">
+        <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+          <i class="fas fa-file-alt text-6xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+        <p class="text-gray-600">Be the first to create content!</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = posts.map(post => `
+    <article class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group">
+      ${post.featuredImage ? `
+        <div class="h-48 overflow-hidden">
+          <img
+            src="${post.featuredImage}"
+            alt="${post.title}"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          >
+        </div>
+      ` : `
+        <div class="h-48 bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+          <i class="fas fa-file-alt text-4xl text-white opacity-50"></i>
+        </div>
+      `}
+
+      <div class="p-6">
+        ${post.category ? `
+          <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 mb-3">
+            ${post.category.name}
+          </div>
+        ` : ''}
+
+        <h3 class="text-lg font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">
+          <a href="/blog/${post.slug}">${post.title}</a>
+        </h3>
+
+        <p class="text-gray-600 mb-4 line-clamp-3">
+          ${post.excerpt || post.content.substring(0, 150) + '...'}
+        </p>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3 text-sm text-gray-500">
+            <div class="flex items-center">
+              <i class="fas fa-user mr-1"></i>
+              ${post.author.fullName || post.author.username}
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-calendar mr-1"></i>
+              ${new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+
+          <a
+            href="/blog/${post.slug}"
+            class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors"
+          >
+            Read more
+            <i class="fas fa-arrow-right ml-1"></i>
+          </a>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+async function loadSiteStatistics() {
+  try {
+    const response = await fetch('/api/site/statistics');
+    if (response.ok) {
+      const data = await response.json();
+
+      // Animate the numbers
+      animateNumber('stat-posts', data.stats.posts || 0);
+      animateNumber('stat-authors', data.stats.authors || 0);
+      animateNumber('stat-categories', data.stats.categories || 0);
+      animateNumber('stat-views', data.stats.views || 0);
+    }
+  } catch (error) {
+    console.error('Error loading site statistics:', error);
+    // Set default values
+    document.getElementById('stat-posts').textContent = '100+';
+    document.getElementById('stat-authors').textContent = '25+';
+    document.getElementById('stat-categories').textContent = '10+';
+    document.getElementById('stat-views').textContent = '5K+';
+  }
+}
+
+function animateNumber(elementId, targetNumber) {
+  const element = document.getElementById(elementId);
+  const duration = 2000;
+  const stepTime = 50;
+  const steps = duration / stepTime;
+  const increment = targetNumber / steps;
+  let current = 0;
+
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= targetNumber) {
+      current = targetNumber;
+      clearInterval(timer);
+    }
+
+    // Format large numbers
+    let displayValue;
+    if (current >= 1000000) {
+      displayValue = (current / 1000000).toFixed(1) + 'M';
+    } else if (current >= 1000) {
+      displayValue = (current / 1000).toFixed(1) + 'K';
+    } else {
+      displayValue = Math.floor(current).toString();
+    }
+
+    element.textContent = displayValue;
+  }, stepTime);
+}
+</script>
+
+        <%- include('../partials/footer') %>
+    </div>
+
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
