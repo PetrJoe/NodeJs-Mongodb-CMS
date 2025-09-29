@@ -90,9 +90,11 @@ categorySchema.pre('deleteOne', { document: true, query: false }, async function
   }
 });
 
-categorySchema.index({ slug: 1 });
-categorySchema.index({ name: 1 });
+// Indexes for name and slug are automatically created by unique: true
+// Additional indexes for query optimization
 categorySchema.index({ parent: 1 });
 categorySchema.index({ isActive: 1 });
+categorySchema.index({ order: 1 });
+categorySchema.index({ createdBy: 1 });
 
 module.exports = mongoose.model('Category', categorySchema);
