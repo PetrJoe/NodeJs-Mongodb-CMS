@@ -1,0 +1,384 @@
+<%- include('../partials/head', {
+  title: 'Categories',
+  metaTags: '<meta name="description" content="Browse all categories to discover organized content on topics that interest you.">'
+}) %>
+
+<!-- Hero Section -->
+<div class="relative bg-gradient-to-r from-primary-600 to-primary-700 py-16">
+  <div class="absolute inset-0 bg-black opacity-20"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+      <i class="fas fa-tags mr-3"></i>
+      Categories
+    </h1>
+    <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+      Explore our content organized by topics and themes
+    </p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Search Bar -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8" x-data="{
+    searchTerm: '',
+    sortBy: 'name'
+  }">
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex-1">
+        <label for="search" class="sr-only">Search categories</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-search text-gray-400"></i>
+          </div>
+          <input
+            type="text"
+            id="search"
+            x-model="searchTerm"
+            @input="filterCategories()"
+            placeholder="Search categories by name or description..."
+            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+          >
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <select
+          x-model="sortBy"
+          @change="filterCategories()"
+          class="block px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option value="name">Sort by Name</option>
+          <option value="posts">Sort by Post Count</option>
+          <option value="popular">Most Popular</option>
+        </select>
+
+        <button
+          @click="searchTerm = ''; sortBy = 'name'; filterCategories()"
+          class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          title="Clear filters"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Categories -->
+  <% if (locals.featuredCategories && featuredCategories.length > 0) { %>
+    <div class="mb-12">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">
+        <i class="fas fa-star text-yellow-500 mr-2"></i>
+        Featured Categories
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% featuredCategories.forEach(category => { %>
+          <div class="group">
+            <a
+              href="/blog?category=<%= category.slug %>"
+              class="block bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                  <div
+                    class="w-6 h-6 rounded-full"
+                    style="background-color: <%= category.color || '#3B82F6' %>"
+                  ></div>
+                  <h3 class="text-xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+                    <%= category.name %>
+                  </h3>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                  Featured
+                </span>
+              </div>
+
+              <p class="text-gray-600 mb-4 line-clamp-3">
+                <%= category.description || 'Discover great content in this category.' %>
+              </p>
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                  <span class="flex items-center">
+                    <i class="fas fa-file-alt mr-1"></i>
+                    <%= category.postCount || 0 %> posts
+                  </span>
+                  <% if (category.subcategories && category.subcategories.length > 0) { %>
+                    <span class="flex items-center">
+                      <i class="fas fa-folder mr-1"></i>
+                      <%= category.subcategories.length %> subcategories
+                    </span>
+                  <% } %>
+                </div>
+                <i class="fas fa-arrow-right text-primary-600 group-hover:translate-x-1 transition-transform"></i>
+              </div>
+            </a>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- All Categories -->
+  <div class="flex items-center justify-between mb-8">
+    <h2 class="text-2xl font-bold text-gray-900">
+      All Categories
+    </h2>
+    <div class="text-sm text-gray-600">
+      <span id="category-count"><%= locals.categories ? categories.length : 0 %></span> categories found
+    </div>
+  </div>
+
+  <!-- Categories Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="categories-grid">
+    <% if (locals.categories && categories.length > 0) { %>
+      <% categories.forEach(category => { %>
+        <div class="category-item group" data-name="<%= category.name.toLowerCase() %>" data-description="<%= (category.description || '').toLowerCase() %>" data-posts="<%= category.postCount || 0 %>">
+          <a
+            href="/blog?category=<%= category.slug %>"
+            class="block bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+          >
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center space-x-3 flex-1 min-w-0">
+                <div
+                  class="w-5 h-5 rounded-full flex-shrink-0"
+                  style="background-color: <%= category.color || '#3B82F6' %>"
+                ></div>
+                <h3 class="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors truncate">
+                  <%= category.name %>
+                </h3>
+              </div>
+              <% if (category.featured) { %>
+                <i class="fas fa-star text-yellow-400 text-sm" title="Featured"></i>
+              <% } %>
+            </div>
+
+            <p class="text-gray-600 text-sm mb-4 line-clamp-3 min-h-12">
+              <%= category.description || 'Explore content in this category.' %>
+            </p>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3 text-xs text-gray-500">
+                <span class="flex items-center">
+                  <i class="fas fa-file-alt mr-1"></i>
+                  <%= category.postCount || 0 %>
+                </span>
+                <% if (category.totalViews) { %>
+                  <span class="flex items-center">
+                    <i class="fas fa-eye mr-1"></i>
+                    <%= category.totalViews %>
+                  </span>
+                <% } %>
+              </div>
+              <i class="fas fa-arrow-right text-primary-600 text-sm group-hover:translate-x-1 transition-transform"></i>
+            </div>
+
+            <!-- Subcategories Preview -->
+            <% if (category.subcategories && category.subcategories.length > 0) { %>
+              <div class="mt-3 pt-3 border-t border-gray-100">
+                <div class="flex flex-wrap gap-1">
+                  <% category.subcategories.slice(0, 3).forEach(sub => { %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      <%= sub.name %>
+                    </span>
+                  <% }); %>
+                  <% if (category.subcategories.length > 3) { %>
+                    <span class="text-xs text-gray-500">
+                      +<%= category.subcategories.length - 3 %> more
+                    </span>
+                  <% } %>
+                </div>
+              </div>
+            <% } %>
+          </a>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <!-- Empty State -->
+      <div class="col-span-full text-center py-16">
+        <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+          <i class="fas fa-tags text-6xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No categories found</h3>
+        <p class="text-gray-600 mb-6">
+          Categories will appear here as content is organized and published.
+        </p>
+        <a
+          href="/blog"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+        >
+          <i class="fas fa-blog mr-2"></i>
+          Browse All Posts
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- No Results State -->
+  <div id="no-results" class="text-center py-16 hidden">
+    <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+      <i class="fas fa-search text-6xl"></i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">No categories match your search</h3>
+    <p class="text-gray-600 mb-6">Try adjusting your search terms or browse all categories.</p>
+    <button
+      onclick="clearSearch()"
+      class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700"
+    >
+      <i class="fas fa-times mr-2"></i>
+      Clear Search
+    </button>
+  </div>
+
+  <!-- Category Statistics -->
+  <div class="mt-16 bg-gray-50 rounded-lg p-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+      <i class="fas fa-chart-bar mr-2"></i>
+      Content Overview
+    </h2>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-primary-600 mb-2">
+          <%= locals.stats ? stats.totalCategories : (locals.categories ? categories.length : 0) %>
+        </div>
+        <div class="text-gray-600 font-medium">Total Categories</div>
+      </div>
+
+      <div class="text-center">
+        <div class="text-3xl font-bold text-green-600 mb-2">
+          <%= locals.stats ? stats.totalPosts : 0 %>
+        </div>
+        <div class="text-gray-600 font-medium">Total Posts</div>
+      </div>
+
+      <div class="text-center">
+        <div class="text-3xl font-bold text-orange-600 mb-2">
+          <%= locals.stats ? stats.featuredCategories : (locals.featuredCategories ? featuredCategories.length : 0) %>
+        </div>
+        <div class="text-gray-600 font-medium">Featured Categories</div>
+      </div>
+
+      <div class="text-center">
+        <div class="text-3xl font-bold text-purple-600 mb-2">
+          <%= locals.stats ? stats.totalViews : 0 %>
+        </div>
+        <div class="text-gray-600 font-medium">Total Views</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let allCategories = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Store all category items for filtering
+  allCategories = Array.from(document.querySelectorAll('.category-item'));
+});
+
+function filterCategories() {
+  const searchTerm = document.getElementById('search').value.toLowerCase();
+  const sortBy = document.querySelector('[x-model="sortBy"]').value;
+
+  let visibleCategories = allCategories.filter(category => {
+    const name = category.dataset.name;
+    const description = category.dataset.description;
+
+    return !searchTerm ||
+           name.includes(searchTerm) ||
+           description.includes(searchTerm);
+  });
+
+  // Sort categories
+  visibleCategories.sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.dataset.name.localeCompare(b.dataset.name);
+      case 'posts':
+        return parseInt(b.dataset.posts) - parseInt(a.dataset.posts);
+      case 'popular':
+        // Sort by post count for now, could be enhanced with view data
+        return parseInt(b.dataset.posts) - parseInt(a.dataset.posts);
+      default:
+        return 0;
+    }
+  });
+
+  // Hide all categories first
+  allCategories.forEach(category => {
+    category.style.display = 'none';
+  });
+
+  // Show filtered and sorted categories
+  if (visibleCategories.length > 0) {
+    const grid = document.getElementById('categories-grid');
+    const noResults = document.getElementById('no-results');
+
+    visibleCategories.forEach((category, index) => {
+      category.style.display = 'block';
+      category.style.order = index;
+    });
+
+    grid.style.display = 'grid';
+    noResults.classList.add('hidden');
+  } else {
+    document.getElementById('categories-grid').style.display = 'none';
+    document.getElementById('no-results').classList.remove('hidden');
+  }
+
+  // Update count
+  document.getElementById('category-count').textContent = visibleCategories.length;
+}
+
+function clearSearch() {
+  document.getElementById('search').value = '';
+  document.querySelector('[x-model="sortBy"]').value = 'name';
+
+  // Reset Alpine.js data
+  const searchComponent = document.querySelector('[x-data]');
+  if (searchComponent && searchComponent._x_dataStack) {
+    searchComponent._x_dataStack[0].searchTerm = '';
+    searchComponent._x_dataStack[0].sortBy = 'name';
+  }
+
+  filterCategories();
+}
+
+// Add some subtle animations on scroll
+window.addEventListener('scroll', function() {
+  const cards = document.querySelectorAll('.category-item');
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+
+    if (isVisible) {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }
+  });
+});
+
+// Initialize card animations
+document.addEventListener('DOMContentLoaded', function() {
+  const cards = document.querySelectorAll('.category-item');
+  cards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+    setTimeout(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, index * 50);
+  });
+});
+</script>
+
+        <%- include('../partials/footer') %>
+    </div>
+
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>
