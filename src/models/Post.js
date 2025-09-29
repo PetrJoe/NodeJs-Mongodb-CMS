@@ -117,12 +117,16 @@ postSchema.pre('save', function(next) {
   next();
 });
 
-postSchema.index({ slug: 1 });
+// Index for slug is automatically created by unique: true
+// Additional indexes for query optimization
 postSchema.index({ status: 1 });
 postSchema.index({ publishedAt: -1 });
 postSchema.index({ author: 1 });
 postSchema.index({ category: 1 });
 postSchema.index({ tags: 1 });
-postSchema.index({ title: 'text', content: 'text', excerpt: 'text' });
+postSchema.index({ views: -1 });
+postSchema.index({ isFeatured: 1 });
+postSchema.index({ status: 1, publishedAt: -1 }); // Compound index for published posts
+postSchema.index({ title: 'text', content: 'text', excerpt: 'text' }); // Text search index
 
 module.exports = mongoose.model('Post', postSchema);
